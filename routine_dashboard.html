@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Growth & Discipline Routine Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        },
+                        amber: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                        },
+                        emerald: {
+                            400: '#34d399',
+                            500: '#10b981',
+                        },
+                        rose: {
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.4);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.7);
+        }
+
+        /* Smooth Progress Ring */
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.5s ease-in-out;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        /* Glassmorphism utility */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .dark .glass-card {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        /* Confetti Canvas overlay */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen pb-16 transition-colors duration-300">
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Top Navigation / Controls Bar -->
+    <header class="sticky top-0 z-40 w-full glass-card border-b border-slate-200 dark:border-slate-800 px-4 lg:px-8 py-3 mb-6">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-rose-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-compass text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-purple-500 to-rose-500 dark:from-indigo-400 dark:via-purple-300 dark:to-rose-400">
+                        Life Operating System
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Growth, Balance & Intentional Living</p>
+                </div>
+            </div>
+
+            <!-- Header Controls & Badges -->
+            <div class="flex items-center flex-wrap gap-3">
+                <!-- Day Selector -->
+                <div class="bg-slate-200/60 dark:bg-slate-800/80 p-1 rounded-xl flex items-center text-xs font-semibold">
+                    <button id="day-type-mon" onclick="setDayType('Mon/Wed/Fri')" class="px-3 py-1.5 rounded-lg transition-all day-btn active-day bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-sm">
+                        Mon / Wed / Fri <span class="text-[10px] opacity-75 font-normal">(Cleaning)</span>
+                    </button>
+                    <button id="day-type-tue" onclick="setDayType('Tue/Thu')" class="px-3 py-1.5 rounded-lg transition-all day-btn text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                        Tue / Thu <span class="text-[10px] opacity-75 font-normal">(Buffer)</span>
+                    </button>
+                </div>
+
+                <!-- Dark Mode Toggle -->
+                <button onclick="toggleDarkMode()" class="w-9 h-9 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-amber-400 flex items-center justify-center hover:scale-105 transition-transform" title="Toggle Dark/Light Mode">
+                    <i class="fa-solid fa-sun dark:hidden"></i>
+                    <i class="fa-solid fa-moon hidden dark:block"></i>
+                </button>
+
+                <!-- Reset Day -->
+                <button onclick="resetDailyProgress()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 transition-colors flex items-center gap-1.5" title="Reset Checkboxes for Today">
+                    <i class="fa-solid fa-rotate-right"></i> Reset Today
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 lg:px-8 space-y-8">
+        
+        <!-- Hero & Stats Header -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Banner: Dynamic Greeting & Daily Quote -->
+            <div class="lg:col-span-2 glass-card rounded-3xl p-6 lg:p-8 relative overflow-hidden flex flex-col justify-between shadow-sm">
+                <div class="absolute -right-12 -top-12 w-48 h-48 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -left-12 -bottom-12 w-48 h-48 bg-rose-500/10 dark:bg-rose-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="relative z-10 space-y-3">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span id="live-date">Loading date...</span>
+                    </div>
+                    <h2 class="text-2xl lg:text-3xl font-extrabold tracking-tight">
+                        Designed for <span class="bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-rose-500">Mastery</span> & Seamless Flow.
+                    </h2>
+                    <p id="quote-display" class="text-sm italic text-slate-600 dark:text-slate-300 border-l-2 border-indigo-500 pl-3 py-1">
+                        "Discipline is choosing between what you want now and what you want most."
+                    </p>
+                </div>
+
+                <!-- Routine Core Focus Tags -->
+                <div class="mt-6 pt-4 border-t border-slate-200/60 dark:border-slate-800/80 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+                    <span class="font-bold text-slate-700 dark:text-slate-300">Daily Core Pillars:</span>
+                    <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400"><i class="fa-solid fa-utensils mr-1"></i> Home Meal Prep</span>
+                    <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-amber-600 dark:text-amber-400"><i class="fa-solid fa-dumbbell mr-1"></i> Gym Strength</span>
+                    <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-rose-600 dark:text-rose-400"><i class="fa-solid fa-rocket mr-1"></i> Career Acceleration</span>
+                    <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400"><i class="fa-solid fa-shield-halved mr-1"></i> Buffer Protection</span>
+                </div>
+            </div>
+
+            <!-- Right Widget: Progress Ring & Stats -->
+            <div class="glass-card rounded-3xl p-6 flex flex-col items-center justify-center text-center relative shadow-sm">
+                <div class="relative flex items-center justify-center">
+                    <svg class="w-36 h-36" viewBox="0 0 120 120">
+                        <circle class="text-slate-200 dark:text-slate-800" stroke-width="10" stroke="currentColor" fill="transparent" r="50" cx="60" cy="60"/>
+                        <circle id="progress-ring" class="text-indigo-500 progress-ring-circle" stroke-width="10" stroke-linecap="round" stroke="currentColor" fill="transparent" r="50" cx="60" cy="60" stroke-dasharray="314.15" stroke-dashoffset="314.15"/>
+                    </svg>
+                    <div class="absolute flex flex-col items-center">
+                        <span id="progress-percentage" class="text-3xl font-extrabold text-slate-900 dark:text-white">0%</span>
+                        <span class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Completed</span>
+                    </div>
+                </div>
+
+                <div class="mt-4 w-full grid grid-cols-2 gap-2 text-center pt-3 border-t border-slate-200/60 dark:border-slate-800/80">
+                    <div class="p-2 rounded-xl bg-slate-100/70 dark:bg-slate-800/50">
+                        <div class="text-xs text-slate-500 dark:text-slate-400">Current Streak</div>
+                        <div class="text-lg font-bold text-amber-500 flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-fire text-amber-500"></i> <span id="streak-count">7</span> Days
+                        </div>
+                    </div>
+                    <div class="p-2 rounded-xl bg-slate-100/70 dark:bg-slate-800/50">
+                        <div class="text-xs text-slate-500 dark:text-slate-400">Blocks Left</div>
+                        <div class="text-lg font-bold text-indigo-500 dark:text-indigo-400" id="remaining-count">13</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- View Controls & Filters -->
+        <section class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+            <div class="flex items-center space-x-2">
+                <h3 class="text-xl font-bold tracking-tight">Daily Schedule Timeline</h3>
+                <span id="active-day-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                    Mon / Wed / Fri
+                </span>
+            </div>
+
+            <!-- View Switcher Tabs -->
+            <div class="bg-slate-200/70 dark:bg-slate-800/80 p-1 rounded-2xl flex items-center text-xs font-semibold self-start sm:self-auto">
+                <button onclick="setViewMode('timeline')" id="view-timeline-btn" class="px-4 py-2 rounded-xl transition-all flex items-center gap-2 bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-sm">
+                    <i class="fa-solid fa-timeline"></i> Timeline View
+                </button>
+                <button onclick="setViewMode('grid')" id="view-grid-btn" class="px-4 py-2 rounded-xl transition-all flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                    <i class="fa-solid fa-border-all"></i> Card Grid
+                </button>
+            </div>
+        </section>
+
+        <!-- Interactive Schedule Timeline Container -->
+        <section id="schedule-container" class="space-y-4">
+            <!-- Dynamically Rendered via JS -->
+        </section>
+
+        <!-- Two Column Grid for Weekly Meal Prep & Buffer Rules -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4">
+            
+            <!-- SECTION: Weekly Batch-Prep Playbook -->
+            <section class="glass-card rounded-3xl p-6 lg:p-8 space-y-6 shadow-sm border border-slate-200/80 dark:border-slate-800/80">
+                <div class="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-800/80 pb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-utensils"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold">Batch-Prep Strategy</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Cook under 20 mins every weeknight</p>
+                        </div>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400">Zero Junk Food</span>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Sunday Mega Prep -->
+                    <div class="p-4 rounded-2xl bg-slate-100/80 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-bold text-amber-600 dark:text-amber-400 flex items-center gap-2">
+                                <i class="fa-solid fa-calendar-check"></i> Sunday Mega-Prep (1.5 - 2 Hours)
+                            </span>
+                            <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-300">Staple Bases</span>
+                        </div>
+                        <ul class="text-xs text-slate-600 dark:text-slate-300 space-y-1.5 pl-5 list-disc">
+                            <li><strong class="text-slate-800 dark:text-slate-100">Grains & Legumes:</strong> Boil large batch of Rajma, Black Chana, or Steamed Rice (good for 3-4 days).</li>
+                            <li><strong class="text-slate-800 dark:text-slate-100">Chopping & Marinades:</strong> Chop onions, peppers, veggies. Marinate Chicken / Paneer / Soybean chunks.</li>
+                            <li><strong class="text-slate-800 dark:text-slate-100">Breakfast Bases:</strong> Ready Besan/Moong batter or oats portioning for 1-minute morning cooking.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Wednesday Mid-Week Refresh -->
+                    <div class="p-4 rounded-2xl bg-slate-100/80 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+                                <i class="fa-solid fa-arrows-rotate"></i> Wednesday Mid-Week Refresh (30-45 Mins)
+                            </span>
+                            <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-700 dark:text-indigo-300">Fresh Refill</span>
+                        </div>
+                        <ul class="text-xs text-slate-600 dark:text-slate-300 space-y-1.5 pl-5 list-disc">
+                            <li><strong class="text-slate-800 dark:text-slate-100">Restock Chopped Greens:</strong> Chop fresh veggies for Thu-Sat.</li>
+                            <li><strong class="text-slate-800 dark:text-slate-100">Second Protein Batch:</strong> Boil fresh legumes/chicken to keep meals fresh and savory through the weekend.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Pro-Tip Banner -->
+                <div class="p-3.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-start gap-3">
+                    <i class="fa-solid fa-lightbulb text-indigo-500 mt-0.5 text-base"></i>
+                    <p class="text-xs text-indigo-900 dark:text-indigo-200 leading-relaxed">
+                        <strong>The Golden Kitchen Rule:</strong> At 6:30 PM, simply toss your pre-boiled legumes/protein & chopped veggies into the pan to simmer on low heat. By the time you finish your shower at 7:45 PM, a steaming hot home meal is ready!
+                    </p>
+                </div>
+            </section>
+
+            <!-- SECTION: Strategic Buffer Rules & Mindset -->
+            <section class="glass-card rounded-3xl p-6 lg:p-8 space-y-6 shadow-sm border border-slate-200/80 dark:border-slate-800/80">
+                <div class="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-800/80 pb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold">Buffer Rules & Guilt-Free Flow</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Protections to eliminate routine burnout</p>
+                        </div>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">Guilt-Free Zone</span>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Rule 1 -->
+                    <div class="p-4 rounded-2xl bg-slate-100/80 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 flex items-start gap-3.5">
+                        <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
+                            1
+                        </div>
+                        <div class="space-y-1">
+                            <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100">The Morning Cushion (9:15 AM - 9:30 AM)</h4>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                                A dedicated 15-minute buffer before stepping out for work prevents morning rush anxiety and sets a calm tone for the day.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Rule 2 -->
+                    <div class="p-4 rounded-2xl bg-slate-100/80 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 flex items-start gap-3.5">
+                        <div class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
+                            2
+                        </div>
+                        <div class="space-y-1">
+                            <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100">The Cook-First Sequence (6:30 PM - 7:45 PM)</h4>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                                Entering the kitchen right after the gym turns meal cooking into a low-effort step. Showering *after* cooking guarantees you sit down to dinner feeling clean and relaxed.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Rule 3 -->
+                    <div class="p-4 rounded-2xl bg-slate-100/80 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 flex items-start gap-3.5">
+                        <div class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
+                            3
+                        </div>
+                        <div class="space-y-1">
+                            <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100">The Spillover Cushion (9:45 PM Shift)</h4>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                                If a job application or interview prep extends past 9:45 PM, shift your 30-minute room cleaning to the alternate day or weekend without breaking your schedule.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Interactive Script -->
+    <script>
+        // Routine Data Master Definition
+        const scheduleBlocks = [
+            {
+                id: 'block-1',
+                time: '8:00 AM - 8:30 AM',
+                title: 'Wake Up & Morning Hydration',
+                desc: 'Gentle wake-up, drink warm water, light stretch to transition out of sleep.',
+                icon: 'fa-sun',
+                color: 'amber',
+                tag: 'Morning Ritual'
+            },
+            {
+                id: 'block-2',
+                time: '8:30 AM - 9:15 AM',
+                title: 'Nourishing Breakfast & Prep',
+                desc: 'Cook quick breakfast (Besan cheela, eggs, oats) and pack office bag.',
+                icon: 'fa-utensils',
+                color: 'emerald',
+                tag: 'Home Nutrition'
+            },
+            {
+                id: 'block-3',
+                time: '9:15 AM - 9:30 AM',
+                title: 'Morning Cushion & Travel',
+                desc: '15-minute padding window to step out the door calmly by 9:30 AM.',
+                icon: 'fa-shield-halved',
+                color: 'indigo',
+                tag: 'Buffer Shield'
+            },
+            {
+                id: 'block-4',
+                time: '9:30 AM - 5:00 PM',
+                title: 'Office Hours & Deep Focus',
+                desc: 'Dedicated office focus hours. High output, minimal distraction.',
+                icon: 'fa-briefcase',
+                color: 'slate',
+                tag: 'Work Focus'
+            },
+            {
+                id: 'block-5',
+                time: '5:00 PM - 5:30 PM',
+                title: 'Commute Home & Pre-Gym Prep',
+                desc: 'Head back home, decompress, wear gym gear & eat a light pre-workout snack.',
+                icon: 'fa-person-walking',
+                color: 'amber',
+                tag: 'Transition'
+            },
+            {
+                id: 'block-6',
+                time: '5:30 PM - 6:30 PM',
+                title: 'Gym & Strength Workout',
+                desc: 'Targeted strength training, muscle toning, and conditioning session.',
+                icon: 'fa-dumbbell',
+                color: 'rose',
+                tag: 'Physical Fitness'
+            },
+            {
+                id: 'block-7',
+                time: '6:30 PM - 7:15 PM',
+                title: 'Kitchen Block & Meal Assembly',
+                desc: 'Walk in post-gym, assemble/simmer dinner with pre-prepped bases (20 min cook). Cover and set aside.',
+                icon: 'fa-fire-burner',
+                color: 'emerald',
+                tag: 'Kitchen First'
+            },
+            {
+                id: 'block-8',
+                time: '7:15 PM - 7:45 PM',
+                title: 'Post-Gym Shower & Reset',
+                desc: 'Wash away sweat, freshen up completely, clear mental slate.',
+                icon: 'fa-shower',
+                color: 'indigo',
+                tag: 'Self Care'
+            },
+            {
+                id: 'block-9',
+                time: '7:45 PM - 8:30 PM',
+                title: 'Mindful Dinner & Kitchen Clean',
+                desc: 'Enjoy your pre-cooked hot home meal in peace, followed by quick kitchen reset.',
+                icon: 'fa-bowl-food',
+                color: 'amber',
+                tag: 'Restoration'
+            },
+            {
+                id: 'block-10',
+                time: '8:30 PM - 9:45 PM',
+                title: 'Career Acceleration Block',
+                desc: '75 mins uninterrupted focus: job applications, skill building & portfolio tuning.',
+                icon: 'fa-rocket',
+                color: 'rose',
+                tag: 'Growth Goal'
+            },
+            {
+                id: 'block-11',
+                time: '9:45 PM - 10:30 PM',
+                title: 'Evening Chores / Unwind',
+                desc: 'Mon/Wed/Fri: 30-min Room Cleaning & Organizing | Tue/Thu: Free Buffer / Relaxation.',
+                icon: 'fa-broom',
+                color: 'emerald',
+                tag: 'Home Care',
+                dynamicText: true
+            },
+            {
+                id: 'block-12',
+                time: '10:30 PM - 11:00 PM',
+                title: 'Night Wind-Down Ritual',
+                desc: 'Screen-free relaxation, light reading, outfit prep for next morning.',
+                icon: 'fa-book-open',
+                color: 'indigo',
+                tag: 'Sleep Prep'
+            },
+            {
+                id: 'block-13',
+                time: '11:00 PM - 11:30 PM',
+                title: 'Rest & Deep Recovery',
+                desc: 'Lights out target for full 8 hours of restorative sleep.',
+                icon: 'fa-bed',
+                color: 'slate',
+                tag: '8h Sleep Target'
+            }
+        ];
+
+        // Quotes collection
+        const motivationalQuotes = [
+            `"Discipline is choosing between what you want now and what you want most."`,
+            `"Small daily improvements over time lead to stunning results."`,
+            `"You do not rise to the level of your goals. You fall to the level of your systems."`,
+            `"Action precedes motivation. Start the step, momentum follows."`,
+            `"Consistency is the magic key that converts effortless habits into life achievements."`
+        ];
+
+        // Global State
+        let currentDayType = 'Mon/Wed/Fri';
+        let currentViewMode = 'timeline'; // 'timeline' or 'grid'
+        let completedBlocks = JSON.parse(localStorage.getItem('routine_completed_blocks') || '{}');
+
+        // Color maps for dynamic styling
+        const colorStyles = {
+            amber: {
+                bg: 'bg-amber-500/10',
+                text: 'text-amber-500',
+                border: 'border-amber-500/30',
+                badge: 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+            },
+            emerald: {
+                bg: 'bg-emerald-500/10',
+                text: 'text-emerald-500',
+                border: 'border-emerald-500/30',
+                badge: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+            },
+            indigo: {
+                bg: 'bg-indigo-500/10',
+                text: 'text-indigo-500',
+                border: 'border-indigo-500/30',
+                badge: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'
+            },
+            rose: {
+                bg: 'bg-rose-500/10',
+                text: 'text-rose-500',
+                border: 'border-rose-500/30',
+                badge: 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+            },
+            slate: {
+                bg: 'bg-slate-500/10',
+                text: 'text-slate-500',
+                border: 'border-slate-500/30',
+                badge: 'bg-slate-500/10 text-slate-600 dark:text-slate-400'
+            }
+        };
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            initLiveDate();
+            initQuote();
+            renderSchedule();
+            updateProgress();
+        });
+
+        function initLiveDate() {
+            const dateObj = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+            document.getElementById('live-date').innerText = dateObj.toLocaleDateString('en-US', options);
+        }
+
+        function initQuote() {
+            const randomIndex = Math.floor(Math.random() * motivationalQuotes.length);
+            document.getElementById('quote-display').innerText = motivationalQuotes[randomIndex];
+        }
+
+        function setDayType(dayType) {
+            currentDayType = dayType;
+            
+            // Update UI buttons
+            const monBtn = document.getElementById('day-type-mon');
+            const tueBtn = document.getElementById('day-type-tue');
+            const activeBadge = document.getElementById('active-day-badge');
+
+            if (dayType === 'Mon/Wed/Fri') {
+                monBtn.className = 'px-3 py-1.5 rounded-lg transition-all day-btn bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-sm font-semibold';
+                tueBtn.className = 'px-3 py-1.5 rounded-lg transition-all day-btn text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium';
+                activeBadge.innerText = 'Mon / Wed / Fri (Room Cleaning)';
+            } else {
+                tueBtn.className = 'px-3 py-1.5 rounded-lg transition-all day-btn bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-sm font-semibold';
+                monBtn.className = 'px-3 py-1.5 rounded-lg transition-all day-btn text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium';
+                activeBadge.innerText = 'Tue / Thu (Buffer & Chill)';
+            }
+
+            renderSchedule();
+        }
+
+        function setViewMode(mode) {
+            currentViewMode = mode;
+            const timelineBtn = document.getElementById('view-timeline-btn');
+            const gridBtn = document.getElementById('view-grid-btn');
+
+            if (mode === 'timeline') {
+                timelineBtn.className = 'px-4 py-2 rounded-xl transition-all flex items-center gap-2 bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-sm font-semibold';
+                gridBtn.className = 'px-4 py-2 rounded-xl transition-all flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium';
+            } else {
+                gridBtn.className = 'px-4 py-2 rounded-xl transition-all flex items-center gap-2 bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-sm font-semibold';
+                timelineBtn.className = 'px-4 py-2 rounded-xl transition-all flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium';
+            }
+
+            renderSchedule();
+        }
+
+        function toggleBlock(id) {
+            completedBlocks[id] = !completedBlocks[id];
+            localStorage.setItem('routine_completed_blocks', JSON.stringify(completedBlocks));
+            
+            // Re-render item & progress
+            renderSchedule();
+            updateProgress();
+
+            // Trigger confetti if all completed
+            if (Object.keys(completedBlocks).filter(k => completedBlocks[k]).length === scheduleBlocks.length) {
+                triggerConfetti();
+            }
+        }
+
+        function resetDailyProgress() {
+            completedBlocks = {};
+            localStorage.removeItem('routine_completed_blocks');
+            renderSchedule();
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const total = scheduleBlocks.length;
+            const completedCount = Object.keys(completedBlocks).filter(k => completedBlocks[k]).length;
+            const percentage = Math.round((completedCount / total) * 100);
+
+            // Update Progress Text
+            document.getElementById('progress-percentage').innerText = `${percentage}%`;
+            document.getElementById('remaining-count').innerText = total - completedCount;
+
+            // Update SVG Ring
+            const circle = document.getElementById('progress-ring');
+            const radius = circle.r.baseVal.value;
+            const circumference = 2 * Math.PI * radius;
+            const offset = circumference - (percentage / 100) * circumference;
+            circle.style.strokeDasharray = `${circumference} ${circumference}`;
+            circle.style.strokeDashoffset = offset;
+        }
+
+        function renderSchedule() {
+            const container = document.getElementById('schedule-container');
+            container.innerHTML = '';
+
+            if (currentViewMode === 'timeline') {
+                container.className = 'space-y-4';
+                scheduleBlocks.forEach((block, idx) => {
+                    const isChecked = !!completedBlocks[block.id];
+                    const color = colorStyles[block.color] || colorStyles.indigo;
+                    
+                    // Dynamic description text based on active day toggle for 9:45 PM block
+                    let blockDesc = block.desc;
+                    if (block.dynamicText) {
+                        blockDesc = currentDayType === 'Mon/Wed/Fri' 
+                            ? 'Dedicated 30-min Room Organization & Maintenance. Keep living space spotless.'
+                            : 'Free Buffer Window. Chill, stretch, watch YouTube, or catch up without guilt.';
+                    }
+
+                    const cardHTML = `
+                        <div class="glass-card rounded-2xl p-4 lg:p-5 transition-all duration-200 border ${isChecked ? 'border-emerald-500/40 bg-emerald-500/5 dark:bg-emerald-950/20' : 'border-slate-200/80 dark:border-slate-800/80'} hover:shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="flex items-start sm:items-center space-x-4">
+                                <!-- Custom Styled Checkbox -->
+                                <button onclick="toggleBlock('${block.id}')" class="mt-1 sm:mt-0 w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all ${isChecked ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 dark:border-slate-700 hover:border-indigo-500 dark:hover:border-indigo-400'}">
+                                    <i class="fa-solid fa-check text-xs ${isChecked ? 'block' : 'hidden'}"></i>
+                                </button>
+
+                                <!-- Icon & Time Block -->
+                                <div class="w-10 h-10 rounded-xl ${color.bg} ${color.text} flex items-center justify-center shrink-0 font-bold text-base">
+                                    <i class="fa-solid ${block.icon}"></i>
+                                </div>
+
+                                <!-- Text Details -->
+                                <div class="space-y-1">
+                                    <div class="flex items-center flex-wrap gap-2">
+                                        <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 tracking-wide">${block.time}</span>
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${color.badge}">${block.tag}</span>
+                                    </div>
+                                    <h4 class="text-base font-bold ${isChecked ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-900 dark:text-slate-100'}">
+                                        ${block.title}
+                                    </h4>
+                                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl">
+                                        ${blockDesc}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Right Indicator -->
+                            <div class="self-end sm:self-center shrink-0">
+                                <span class="text-xs font-semibold ${isChecked ? 'text-emerald-500' : 'text-slate-400 dark:text-slate-500'}">
+                                    ${isChecked ? '<i class="fa-solid fa-circle-check"></i> Completed' : 'Pending'}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += cardHTML;
+                });
+            } else {
+                // Card Grid View
+                container.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
+                scheduleBlocks.forEach((block) => {
+                    const isChecked = !!completedBlocks[block.id];
+                    const color = colorStyles[block.color] || colorStyles.indigo;
+                    
+                    let blockDesc = block.desc;
+                    if (block.dynamicText) {
+                        blockDesc = currentDayType === 'Mon/Wed/Fri' 
+                            ? 'Dedicated 30-min Room Organization.'
+                            : 'Free Buffer Window. Chill & unwind.';
+                    }
+
+                    const cardHTML = `
+                        <div class="glass-card rounded-2xl p-5 transition-all duration-200 border ${isChecked ? 'border-emerald-500/40 bg-emerald-500/5 dark:bg-emerald-950/20' : 'border-slate-200/80 dark:border-slate-800/80'} flex flex-col justify-between space-y-4">
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <div class="w-10 h-10 rounded-xl ${color.bg} ${color.text} flex items-center justify-center font-bold text-base">
+                                        <i class="fa-solid ${block.icon}"></i>
+                                    </div>
+                                    <button onclick="toggleBlock('${block.id}')" class="w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all ${isChecked ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 dark:border-slate-700 hover:border-indigo-500'}">
+                                        <i class="fa-solid fa-check text-xs ${isChecked ? 'block' : 'hidden'}"></i>
+                                    </button>
+                                </div>
+
+                                <div>
+                                    <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 tracking-wide block">${block.time}</span>
+                                    <h4 class="text-base font-bold mt-0.5 ${isChecked ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-900 dark:text-slate-100'}">
+                                        ${block.title}
+                                    </h4>
+                                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
+                                        ${blockDesc}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="pt-3 border-t border-slate-200/50 dark:border-slate-800/50 flex items-center justify-between">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${color.badge}">${block.tag}</span>
+                                <span class="text-xs font-medium ${isChecked ? 'text-emerald-500' : 'text-slate-400'}">
+                                    ${isChecked ? 'Done' : 'To Do'}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += cardHTML;
+                });
+            }
+        }
+
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+        }
+
+        // Simple Canvas Confetti Effect when 100% complete
+        function triggerConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const pieces = [];
+            const colors = ['#6366f1', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6'];
+
+            for (let i = 0; i < 100; i++) {
+                pieces.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speed: Math.random() * 5 + 2,
+                    angle: Math.random() * 360
+                });
+            }
+
+            let animationFrame;
+            function update() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                pieces.forEach(p => {
+                    p.y += p.speed;
+                    p.angle += 2;
+                    ctx.save();
+                    ctx.fillStyle = p.color;
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.angle * Math.PI) / 180);
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    ctx.restore();
+                });
+
+                if (pieces.some(p => p.y < canvas.height)) {
+                    animationFrame = requestAnimationFrame(update);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    cancelAnimationFrame(animationFrame);
+                }
+            }
+            update();
+        }
+    </script>
+</body>
+</html>
